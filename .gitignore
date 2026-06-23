@@ -17,6 +17,7 @@ __pycache__/
 # Node / frontend
 node_modules/
 dist/
+*.tsbuildinfo
 
 # Build da SPA copiada para o backend
 backend/static/
