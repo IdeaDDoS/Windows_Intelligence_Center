@@ -87,9 +87,13 @@ pip install -r requirements.txt
 streamlit run dashboard.py
 
 # Motor ETL de auditoria (referência do pipeline collectors→analyzers→report)
-cd Dash_Manager_Windows/.local/security_audit
-python main.py            # JSON + HTML (+ PDF se weasyprint)
+cd C:\Cofres_C\IdeaDDoS\Dash_Manager_Windows\.local\security_audit          # JSON + HTML (+ PDF se weasyprint)
+
+# Referencia de Arquiterura e engenharia
+cd C:\Cofres_C\IdeaDDoS\clones\dashboards_us-media\ && cat .\README.md  
+
 ```
+
 
 No Windows, rode o terminal **como administrador** para coleta completa; sem
 elevação os coletores se marcam `partial` (devem degradar, nunca quebrar).
@@ -114,6 +118,22 @@ elevação os coletores se marcam `partial` (devem degradar, nunca quebrar).
 - `from __future__ import annotations` no topo dos módulos Python.
 - Não versionar `.venv/`, `__pycache__/`, `*.db`, `node_modules/`, nem os
   artefatos pesados do protótipo (`.mp4`, `.dmp`, datasets, `reports/`).
+
+## Rules ativas (do claude-harness)
+
+Diretrizes "sempre seguir" importadas da **fonte canônica** em
+`../claude-harness/rules/` (repo irmão `IdeaDDoS/claude-harness`). **Edite-as lá,
+não aqui** — os `@imports` abaixo refletem a fonte automaticamente.
+
+Ligadas as rules **por linguagem** (agregam conteúdo específico ao stack do WIC).
+A `rules/common` foi deixada de fora **de propósito**: já está coberta por
+"Princípios não negociáveis" + "Convenções" acima — ligá-la duplicaria contexto
+(aplicando a própria skill `context-budget` do harness).
+
+@../claude-harness/rules/python/python.md
+@../claude-harness/rules/powershell/powershell.md
+@../claude-harness/rules/typescript/typescript.md
+@../claude-harness/rules/sql/sql.md
 
 ## Topologia git (cuidado)
 

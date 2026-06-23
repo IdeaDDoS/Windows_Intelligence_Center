@@ -10,6 +10,7 @@
 | Stack / UI | **FastAPI + React (Vite)** | 2026-06-21 |
 | Armazenamento local | **SQLite** (via camada de repositório, trocável) | 2026-06-21 |
 | Ponto de partida | **Fatia 0 + Fatia 1** | 2026-06-21 |
+| Frontend | **TypeScript** (strict) | 2026-06-23 |
 
 ---
 
@@ -18,8 +19,8 @@
 | Ativo | O que é | Papel |
 |---|---|---|
 | `README.md` | A visão: coletar → armazenar → correlacionar → explicar, 100% local | Norte do produto |
-| `Dash_Manager_Windows/` | Protótipo Streamlit funcional (métricas, processos, assinatura digital, serviços, atalhos Win+R, "explicar com Claude" desligado) | Fonte de lógica p/ os collectors |
-| `dashboards_us-media/` | Arquitetura de referência limpa (FastAPI + Pydantic v2 + camadas + React/Vite), porém cloud/multi-tenant | Molde estrutural |
+| `C:/Cofres_C/IdeaDDoS/Dash_Manager_Windows/` | Protótipo Streamlit funcional (métricas, processos, assinatura digital, serviços, atalhos Win+R, "explicar com Claude" desligado) | Fonte de lógica p/ os collectors |
+| `C:/Cofres_C/IdeaDDoS/clones/dashboards_us-media/` | Arquitetura de referência limpa (FastAPI + Pydantic v2 + camadas + React/Vite), porém cloud/multi-tenant | Molde estrutural |
 
 **Sacada central:** adotar a estrutura em camadas do us-media e **descartar** tudo
 que é nuvem/multiusuário (GCP, Firestore, Cloud Run, OAuth, magic links). O
@@ -85,7 +86,7 @@ Cada fatia entrega coletor → storage → API → UI ponta a ponta, mapeada às
 
 | Fatia | Entrega | Fase README |
 |---|---|---|
-| **0** | Fundação: esqueleto backend+frontend, config, `/api/health`, start.ps1, `.gitignore` | — |
+| **0** ✅ | Fundação: esqueleto backend+frontend, config, `/api/health`, start.ps1, `.gitignore` — **concluída 2026-06-23** | — |
 | **1** | Métricas ao vivo (CPU/mem/disco/rede) + KPI cards | Fase 1 |
 | **2** | Processos + metadados (assinatura, serviços) + detalhe | Fase 1 |
 | **3** | Histórico: sampler em background + `/metrics/history` + gráficos ⭐ | Fase 1→3 |
@@ -128,6 +129,12 @@ Cada fatia entrega coletor → storage → API → UI ponta a ponta, mapeada às
 - `.gitignore` — `.venv/`, `__pycache__/`, `*.db`, `node_modules/`, datasets/dumps/vídeos pesados.
 
 **Pronto quando:** `start.ps1` sobe os dois serviços e a tela mostra "online" lendo `/api/health`.
+
+> **Status (2026-06-23): concluída.** Backend validado (TestClient + uvicorn real
+> na `:8000` → `/api/health` 200; schema SQLite versionado via `database/schema.sql`
+> + tabela `schema_meta`). Frontend em **TypeScript** compila e builda (`tsc --noEmit`
+> + `vite build`). Backend bind em `127.0.0.1` (local-first). Falta só o check visual
+> final via `start.ps1`. Pré-requisitos instalados: `backend/.venv` + `frontend/node_modules`.
 
 ## Detalhe da Fatia 1 — Métricas ao vivo
 

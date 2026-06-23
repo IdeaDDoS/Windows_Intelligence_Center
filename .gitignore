@@ -1,1 +1,27 @@
+# Arquivos pessoais / contexto local
 .local
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Banco de dados local (runtime) — o DDL versionado fica em database/schema.sql
+*.db
+*.db-wal
+*.db-shm
+
+# Ambiente
+.env
+
+# Node / frontend
+node_modules/
+dist/
+
+# Build da SPA copiada para o backend
+backend/static/
+
+# Artefatos pesados do protótipo de referência
+*.mp4
+*.dmp
+reports/
