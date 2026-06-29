@@ -395,3 +395,116 @@ button:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Postura de segurança (Fatia 6) */
+.security-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.security-head h2 {
+  margin: 0;
+}
+
+.score {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.score__value {
+  font-size: 2.4rem;
+  font-weight: 700;
+}
+
+.score__max {
+  color: var(--muted);
+}
+
+.score--good .score__value {
+  color: var(--ok);
+}
+
+.score--warn .score__value {
+  color: #d29922;
+}
+
+.score--bad .score__value {
+  color: var(--err);
+}
+
+.findings {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.finding {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.finding__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.finding__desc {
+  margin: 6px 0 0;
+  color: var(--text);
+  font-size: 0.92rem;
+}
+
+.finding__rec {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.sev {
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.sev--critical {
+  color: #fff;
+  background: var(--err);
+  border-color: var(--err);
+}
+
+.sev--high {
+  color: var(--err);
+  border-color: var(--err);
+}
+
+.sev--medium {
+  color: #d29922;
+  border-color: #d29922;
+}
+
+.sev--low {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+.sev--info {
+  color: var(--muted);
+}

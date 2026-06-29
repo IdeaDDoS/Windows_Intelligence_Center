@@ -55,3 +55,27 @@ FROM (
     UNION ALL SELECT 'disk_pct', '>', 90.0, 0
 )
 WHERE NOT EXISTS (SELECT 1 FROM alert_rules);
+
+-- Fatia 6: auditorias de postura de segurança e seus achados.
+CREATE TABLE IF NOT EXISTS audits (
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
+    ts      TEXT    NOT NULL,
+    score   INTEGER NOT NULL,
+    summary TEXT    NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_audits_ts ON audits (ts);
+
+CREATE TABLE IF NOT EXISTS findings (
+    id             INTEGER PRIMARY KEY AUTOINCREMENT,
+    audit_id       INTEGER NOT NULL REFERENCES audits (id),
+    finding_key    TEXT    NOT NULL,
+    title          TEXT    NOT NULL,
+    severity       TEXT    NOT NULL,
+    category       TEXT    NOT NULL,
+    description    TEXT    NOT NULL,
+    recommendation TEXT    NOT NULL DEFAULT '',
+    evidence       TEXT    NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_findings_audit ON findings (audit_id);

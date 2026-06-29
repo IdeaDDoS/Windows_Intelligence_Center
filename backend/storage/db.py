@@ -12,7 +12,7 @@ import sqlite3
 from config import settings
 
 # Versão atual do schema (incrementa a cada mudança de DDL).
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 # DDL versionado, ao lado do arquivo .db.
 _SCHEMA_FILE = settings.db_path.parent / "schema.sql"
 

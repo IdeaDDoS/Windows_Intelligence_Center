@@ -167,6 +167,76 @@ export interface EventQuery {
   limit?: number
 }
 
+// ── Postura de segurança / auditoria (Fatia 6) ───────────────────────────────
+
+export interface PortItem {
+  port: number
+  protocol: string
+  address: string
+  status: string
+  pid: number | null
+  process: string | null
+  service: string | null
+  public: boolean
+}
+
+export interface DefenderPayload {
+  antivirus_enabled: boolean | null
+  realtime_enabled: boolean | null
+  signatures_last_updated: string | null
+}
+
+export interface SecurityConfigPayload {
+  firewall: Record<string, boolean>
+  defender: DefenderPayload
+  antivirus: string[]
+  last_hotfix: string | null
+}
+
+export interface FindingItem {
+  id: string
+  title: string
+  severity: string
+  category: string
+  description: string
+  recommendation: string
+  evidence: Record<string, unknown>
+}
+
+export interface ScoreLineItem {
+  label: string
+  delta: number
+}
+
+export interface AuditSummary {
+  id: number
+  ts: string
+  score: number
+  summary: string
+}
+
+export interface AuditRunResponse {
+  id: number
+  ts: string
+  score: number
+  summary: string
+  partial: boolean
+  partial_reason: string | null
+  findings: FindingItem[]
+  ports: PortItem[]
+  security: SecurityConfigPayload | null
+  score_breakdown: ScoreLineItem[]
+}
+
+export interface AuditDetailResponse {
+  audit: AuditSummary | null
+  findings: FindingItem[]
+}
+
+export interface AuditListResponse {
+  audits: AuditSummary[]
+}
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(path, { headers: { Accept: 'application/json' } })
   if (!res.ok) {
@@ -215,4 +285,7 @@ export const api = {
     })
     return getJson<EventListResponse>(`/api/events?${params.toString()}`)
   },
+  runAudit: () => sendJson<AuditRunResponse>('/api/audit/run', 'POST'),
+  auditLatest: () => getJson<AuditDetailResponse>('/api/audit/latest'),
+  audits: () => getJson<AuditListResponse>('/api/audit'),
 }

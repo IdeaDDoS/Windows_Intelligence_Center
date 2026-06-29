@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from enum import Enum
 
 
 def _now_utc() -> datetime:
@@ -130,3 +131,87 @@ class Alert:
     ts: datetime
     value: float
     message: str
+
+
+# ── Postura de segurança (Fatia 6) ───────────────────────────────────────────
+
+
+class Severity(str, Enum):
+    """Severidade de um achado. Herda de str para serializar como texto."""
+
+    INFO = "info"
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+
+# Peso de dedução no score por severidade (o score parte de 100 e desconta).
+SEVERITY_WEIGHT: dict[Severity, int] = {
+    Severity.INFO: 0,
+    Severity.LOW: 3,
+    Severity.MEDIUM: 8,
+    Severity.HIGH: 15,
+    Severity.CRITICAL: 25,
+}
+
+
+@dataclass
+class PortInfo:
+    """Uma porta em escuta (bind), com o processo dono."""
+
+    port: int
+    protocol: str  # TCP | UDP
+    address: str
+    status: str
+    pid: int | None
+    process: str | None
+    service: str | None
+    public: bool  # escuta em 0.0.0.0/:: → exposta na rede
+
+
+@dataclass
+class SecurityConfig:
+    """Configuração de segurança do Windows (firewall, antivírus, hotfix)."""
+
+    firewall: dict[str, bool] = field(default_factory=dict)  # perfil → ativo
+    defender: dict[str, object] = field(default_factory=dict)  # flags do Defender
+    antivirus: list[str] = field(default_factory=list)  # produtos de terceiros
+    last_hotfix: str | None = None
+
+
+@dataclass
+class Finding:
+    """Um achado da auditoria — sempre com motivo e recomendação."""
+
+    id: str
+    title: str
+    severity: Severity
+    category: str  # ports | firewall | defender | ...
+    description: str
+    recommendation: str = ""
+    evidence: dict = field(default_factory=dict)
+
+
+@dataclass
+class ScoreLine:
+    """Uma linha do detalhamento do score (para ele 'se explicar')."""
+
+    label: str
+    delta: int  # negativo = pontos perdidos
+
+
+@dataclass
+class AuditResult:
+    """Resultado canônico de uma auditoria de postura de segurança."""
+
+    ts: datetime
+    score: int
+    summary: str
+    findings: list[Finding] = field(default_factory=list)
+    ports: list[PortInfo] = field(default_factory=list)
+    security: SecurityConfig | None = None
+    score_breakdown: list[ScoreLine] = field(default_factory=list)
+    partial: bool = False
+    partial_reason: str | None = None
+    id: int | None = None

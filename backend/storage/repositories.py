@@ -6,10 +6,11 @@ Todas as queries são parametrizadas — nunca dado concatenado.
 
 from __future__ import annotations
 
+import json
 import math
 from datetime import datetime, timedelta, timezone
 
-from models.schema import AlertRule, SystemMetrics
+from models.schema import AlertRule, Finding, SystemMetrics
 from storage.db import get_connection
 
 # Janelas de histórico suportadas → segundos.
@@ -200,3 +201,83 @@ def ack_alert(alert_id: int) -> bool:
         )
         conn.commit()
         return cur.rowcount > 0
+
+
+# ── Auditorias de segurança (Fatia 6) ────────────────────────────────────────
+
+
+def insert_audit(ts: datetime, score: int, summary: str, findings: list[Finding]) -> int:
+    """Persiste uma auditoria com seus findings (uma transação). Retorna o id."""
+    with get_connection() as conn:
+        cur = conn.execute(
+            "INSERT INTO audits (ts, score, summary) VALUES (?, ?, ?)",
+            (_iso(ts), score, summary),
+        )
+        audit_id = int(cur.lastrowid)
+        conn.executemany(
+            "INSERT INTO findings "
+            "(audit_id, finding_key, title, severity, category, description, "
+            "recommendation, evidence) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                (
+                    audit_id,
+                    f.id,
+                    f.title,
+                    f.severity.value,
+                    f.category,
+                    f.description,
+                    f.recommendation,
+                    json.dumps(f.evidence, ensure_ascii=False),
+                )
+                for f in findings
+            ],
+        )
+        conn.commit()
+        return audit_id
+
+
+def get_latest_audit() -> dict | None:
+    """A auditoria mais recente (sem os findings), ou None."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT id, ts, score, summary FROM audits ORDER BY ts DESC, id DESC LIMIT 1"
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def get_audit(audit_id: int) -> dict | None:
+    """Uma auditoria pelo id (sem os findings), ou None."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT id, ts, score, summary FROM audits WHERE id = ?", (audit_id,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def list_audits(limit: int = 50) -> list[dict]:
+    """Histórico de auditorias (mais recentes primeiro), sem findings."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT id, ts, score, summary FROM audits ORDER BY ts DESC, id DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def get_findings(audit_id: int) -> list[dict]:
+    """Findings de uma auditoria; ``evidence`` já desserializado de JSON."""
+    with get_connection() as conn:
+        rows = conn.execute(
+            "SELECT finding_key, title, severity, category, description, "
+            "recommendation, evidence FROM findings WHERE audit_id = ? ORDER BY id",
+            (audit_id,),
+        ).fetchall()
+    findings: list[dict] = []
+    for r in rows:
+        item = dict(r)
+        try:
+            item["evidence"] = json.loads(item["evidence"])
+        except (json.JSONDecodeError, TypeError):
+            item["evidence"] = {}
+        findings.append(item)
+    return findings

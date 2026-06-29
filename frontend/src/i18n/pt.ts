@@ -12,6 +12,7 @@ export const pt = {
   navHistory: 'Histórico',
   navAlerts: 'Alertas',
   navEvents: 'Eventos',
+  navSecurity: 'Segurança',
   // Métricas (Fatia 1)
   cpu: 'CPU',
   memory: 'Memória',
@@ -72,6 +73,29 @@ export const pt = {
   colMessage: 'Mensagem',
   noEvents: 'Nenhum evento no filtro atual.',
   eventsPartial: 'Coleta parcial — o log Security exige executar como administrador.',
+  // Postura de segurança (Fatia 6)
+  security: 'Postura de segurança',
+  runAudit: 'Rodar auditoria',
+  running: 'auditando…',
+  securityScore: 'Score de segurança',
+  findings: 'Achados',
+  noFindings: 'Nenhum achado — postura limpa.',
+  noAudit: 'Nenhuma auditoria ainda. Rode a primeira para ver o score.',
+  recommendation: 'Recomendação',
+  openPorts: 'Portas em escuta',
+  firewall: 'Firewall',
+  defender: 'Defender',
+  thirdPartyAv: 'Antivírus de terceiros',
+  lastHotfix: 'Último hotfix',
+  on: 'ativo',
+  off: 'desativado',
+  unknown: 'desconhecido',
+  auditPartial: 'Coleta parcial — rode como administrador para uma auditoria completa.',
+  colPort: 'Porta',
+  colProtocol: 'Protocolo',
+  colAddress: 'Endereço',
+  colProcess: 'Processo',
+  exposed: 'exposta',
 } as const
 
 export type Strings = typeof pt
