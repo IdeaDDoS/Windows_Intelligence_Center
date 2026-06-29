@@ -105,10 +105,10 @@ Cada fatia entrega coletor → storage → API → UI ponta a ponta, mapeada às
 | Fatia | Entrega | Fase README |
 |---|---|---|
 | **0** ✅ | Fundação: esqueleto backend+frontend, config, `/api/health`, start.ps1, `.gitignore` — **concluída 2026-06-23** | — |
-| **1** 🎯 | Métricas ao vivo (CPU/mem/disco/rede) + KPI cards | Fase 1 |
-| **2** 🎯 | Processos + metadados (assinatura, serviços) + detalhe | Fase 1 |
-| **3** 🎯 | Histórico: sampler em background + `/metrics/history` + gráficos ⭐ | Fase 1→3 |
-| **4** 🎯 | Alertas por limiar configurável | Fase 1 |
+| **1** ✅ | Métricas ao vivo (CPU/mem/disco/rede) + KPI cards — **concluída 2026-06-29** | Fase 1 |
+| **2** ✅ | Processos + metadados (assinatura, serviços) + detalhe — **concluída 2026-06-29** | Fase 1 |
+| **3** ✅ | Histórico: sampler em background + `/metrics/history` + gráficos ⭐ — **concluída 2026-06-29** | Fase 1→3 |
+| **4** ✅ | Alertas por limiar configurável — **concluída 2026-06-29** | Fase 1 |
 | **5** | Logs / Event Viewer (Get-WinEvent) + busca/filtros | Fase 2 |
 | **6** | Postura de segurança: ports/services/security_config + findings + score | Fase 4 |
 | **7** | Explicações com Claude (Haiku) + cache | Fase 3 |
@@ -286,3 +286,10 @@ Cada fatia entrega coletor → storage → API → UI ponta a ponta, mapeada às
 
 **Pronto quando:** os testes acima passam (pytest + vitest verdes). **Fim do escopo
 autônomo** — o harness relata o resultado das 4 fatias e devolve o controle.
+
+> **Status (2026-06-29): fatias 1–4 concluídas.** Execução autônoma fechou as 4
+> fatias da Fase 1, cada uma `collector/storage → API → UI` com testes verdes e
+> commit conventional (sem push): `43615ec` (1), `e330a82` (2), `35dc370` (3),
+> `9d3b2ec` (4). Suíte final: **backend 32 pytest + frontend 7 vitest** verdes;
+> `tsc --noEmit` limpo. Nenhum bloqueio acionou a política de parada. Próximo
+> alvo natural: Fatia 5 (Logs / Event Viewer).
