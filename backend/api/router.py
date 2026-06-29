@@ -5,6 +5,8 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from api.health import router as health_router
+from api.metrics import router as metrics_router
 
 api_router = APIRouter(prefix="/api")
 api_router.include_router(health_router, tags=["health"])
+api_router.include_router(metrics_router, tags=["metrics"])

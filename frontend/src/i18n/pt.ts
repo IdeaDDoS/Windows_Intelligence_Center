@@ -2,15 +2,14 @@
 
 export const pt = {
   appName: 'Windows Intelligence Center',
-  backendStatus: 'Status do backend',
-  online: 'online',
-  offline: 'offline',
   checking: 'verificando…',
-  version: 'Versão',
-  platform: 'Plataforma',
-  privilege: 'Privilégio',
-  admin: 'Administrador',
-  standardUser: 'Usuário padrão',
+  // Métricas (Fatia 1)
+  cpu: 'CPU',
+  memory: 'Memória',
+  disk: 'Disco',
+  network: 'Rede',
+  uptime: 'Uptime',
+  metricsError: 'Não foi possível ler as métricas (backend offline?)',
 } as const
 
 export type Strings = typeof pt
