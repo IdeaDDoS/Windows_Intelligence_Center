@@ -17,6 +17,7 @@
 | Gráficos / data-fetching | **Recharts + TanStack Query** | 2026-06-23 |
 | Alertas (Fatia 4) | **in-app** (badge + lista), sem notificação nativa | 2026-06-23 |
 | Assinatura digital (Fatia 2) | **sob demanda** no detalhe do processo | 2026-06-23 |
+| Eventos (Fatia 5) | **on-demand** (Get-WinEvent por request); **sem** tabela `events` nesta fatia | 2026-06-29 |
 
 ---
 
@@ -109,7 +110,7 @@ Cada fatia entrega coletor → storage → API → UI ponta a ponta, mapeada às
 | **2** ✅ | Processos + metadados (assinatura, serviços) + detalhe — **concluída 2026-06-29** | Fase 1 |
 | **3** ✅ | Histórico: sampler em background + `/metrics/history` + gráficos ⭐ — **concluída 2026-06-29** | Fase 1→3 |
 | **4** ✅ | Alertas por limiar configurável — **concluída 2026-06-29** | Fase 1 |
-| **5** | Logs / Event Viewer (Get-WinEvent) + busca/filtros | Fase 2 |
+| **5** ✅ | Logs / Event Viewer (Get-WinEvent) + busca/filtros — **concluída 2026-06-29** | Fase 2 |
 | **6** | Postura de segurança: ports/services/security_config + findings + score | Fase 4 |
 | **7** | Explicações com Claude (Haiku) + cache | Fase 3 |
 | **8** | Anomalias, baseline, comparação entre períodos, correlação | Fase 3 |
@@ -293,3 +294,35 @@ autônomo** — o harness relata o resultado das 4 fatias e devolve o controle.
 > `9d3b2ec` (4). Suíte final: **backend 32 pytest + frontend 7 vitest** verdes;
 > `tsc --noEmit` limpo. Nenhum bloqueio acionou a política de parada. Próximo
 > alvo natural: Fatia 5 (Logs / Event Viewer).
+
+---
+
+## Detalhe da Fatia 5 — Logs / Event Viewer (on-demand)
+
+> Contrato definido **na execução** (não estava pré-travado). Decisão: **on-demand**
+> via Get-WinEvent, **sem** persistir na tabela `events` (o §5 cita a tabela, mas
+> ela fica para uma fatia futura de correlação — o plano é documento vivo).
+
+**Backend**
+- `backend/collectors/events.py` — `collect_events(log, level, since_seconds, limit)
+  -> tuple[list[EventInfo], CollectorMeta]` via PowerShell `Get-WinEvent
+  -FilterHashtable`. Filtros passam por **variáveis de ambiente** (`WIC_EV_*`),
+  nunca concatenados no comando (anti-injeção). "No events found" vira lista vazia
+  (não erro); `Security` sem elevação degrada para `partial`; nunca levanta.
+- `backend/models/schema.py` — `EventInfo(ts, log, provider, event_id, level, message)`.
+- `backend/api/events.py` — `GET /api/events?log=&level=&since=&limit=` (log/level/
+  since validados por `Literal`, `limit` 1–1000) → `{events, meta}`. Handler `def`
+  síncrono (subprocess bloqueante → threadpool).
+
+**Frontend**
+- `src/components/EventsTable.tsx`, `src/pages/EventsPage.tsx` (filtros log/nível/
+  período + aviso de coleta parcial), rota `/events` + i18n.
+
+**Testes (critério de pronto)**
+- `tests/test_collectors_events.py` — parsing (lista e objeto único), "no events"
+  vazio, acesso negado → `partial`, PowerShell ausente → `partial` (subprocess mockado).
+- `tests/test_api_events.py` — contrato 200 + shape; `log`/`level` inválidos → 422.
+- `frontend/src/components/EventsTable.test.tsx` (vitest) — renderiza linhas dado mock.
+
+> **Status (2026-06-29): concluída.** Commit `4dd889e`. Suíte: **backend 40 pytest +
+> frontend 8 vitest** verdes; `tsc --noEmit` limpo.
