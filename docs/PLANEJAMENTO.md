@@ -18,6 +18,7 @@
 | Alertas (Fatia 4) | **in-app** (badge + lista), sem notificação nativa | 2026-06-23 |
 | Assinatura digital (Fatia 2) | **sob demanda** no detalhe do processo | 2026-06-23 |
 | Eventos (Fatia 5) | **on-demand** (Get-WinEvent por request); **sem** tabela `events` nesta fatia | 2026-06-29 |
+| Auditoria (Fatia 6) | **sob demanda** + persistência (`audits`/`findings`); checks: portas de risco + firewall/Defender; score 100 − pesos | 2026-06-29 |
 
 ---
 
@@ -111,7 +112,7 @@ Cada fatia entrega coletor → storage → API → UI ponta a ponta, mapeada às
 | **3** ✅ | Histórico: sampler em background + `/metrics/history` + gráficos ⭐ — **concluída 2026-06-29** | Fase 1→3 |
 | **4** ✅ | Alertas por limiar configurável — **concluída 2026-06-29** | Fase 1 |
 | **5** ✅ | Logs / Event Viewer (Get-WinEvent) + busca/filtros — **concluída 2026-06-29** | Fase 2 |
-| **6** | Postura de segurança: ports/services/security_config + findings + score | Fase 4 |
+| **6** ✅ | Postura de segurança: ports/security_config + findings + score — **concluída 2026-06-29** | Fase 4 |
 | **7** | Explicações com Claude (Haiku) + cache | Fase 3 |
 | **8** | Anomalias, baseline, comparação entre períodos, correlação | Fase 3 |
 | **9** | Atalhos Win+R + export de snapshot (JSON/HTML/CSV) | Fase 3/4 |
@@ -326,3 +327,42 @@ autônomo** — o harness relata o resultado das 4 fatias e devolve o controle.
 
 > **Status (2026-06-29): concluída.** Commit `4dd889e`. Suíte: **backend 40 pytest +
 > frontend 8 vitest** verdes; `tsc --noEmit` limpo.
+
+---
+
+## Detalhe da Fatia 6 — Postura de segurança (audit/findings/score)
+
+> Contrato definido **na execução** (escopo completo, escolha do usuário). Pipeline
+> portado do motor de referência `Dash_Manager_Windows/.local/security_audit/`.
+
+**Backend (pipeline collector → analyzer → service → storage)**
+- `collectors/ports.py` — `collect_ports()` via `psutil.net_connections`; marca
+  `public` (bind 0.0.0.0/::); degrada `partial` sem acesso.
+- `collectors/security_config.py` — `collect_security_config()` numa única chamada
+  PowerShell (firewall por perfil, Defender antivírus/tempo-real/assinaturas,
+  antivírus de terceiros, último hotfix); degrada `partial` fora do Windows / sem admin.
+- `analyzers/findings.py` — `from_ports` (porta de risco exposta → HIGH; local → LOW;
+  resumo INFO) + `from_security` (firewall/Defender off → HIGH; usa `is False` para
+  não sinalizar dado ausente). `analyzers/scoring.py` — `compute` (100 − pesos por
+  severidade, com breakdown que "se explica").
+- `models/schema.py` — `Severity`(enum) + `SEVERITY_WEIGHT`, `PortInfo`,
+  `SecurityConfig`, `Finding`, `ScoreLine`, `AuditResult`.
+- `services/audit.py` — `run_audit()` orquestra coleta+análise, persiste e devolve.
+- storage `audits`/`findings` (schema v4); repositories persistem audit+findings numa
+  transação e consultam latest/histórico/detalhe.
+- `api/audit.py` — `POST /api/audit/run`, `GET /api/audit/latest`, `GET /api/audit`
+  (histórico), `GET /api/audit/{id}` (404). Handlers `def` (I/O bloqueante → threadpool).
+
+**Frontend**
+- `src/pages/SecurityPage.tsx` (botão rodar, faixa de score, findings, card de config
+  de segurança, tabela de portas) + `src/components/FindingsList.tsx`; rota `/security`
+  + i18n.
+
+**Testes (critério de pronto)**
+- `tests/test_analyzers_findings.py`, `tests/test_scoring.py` (regras + score),
+  `tests/test_collectors_ports.py` (estrutural), `tests/test_collectors_security_config.py`
+  (PowerShell mockado), `tests/test_api_audit.py` (run/persist/latest/histórico/404).
+- `frontend/src/components/FindingsList.test.tsx` (vitest).
+
+> **Status (2026-06-29): concluída.** Commit `9153fcb`. Suíte: **backend 64 pytest +
+> frontend 10 vitest** verdes; `tsc --noEmit` limpo.
