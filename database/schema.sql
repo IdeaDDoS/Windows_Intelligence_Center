@@ -24,3 +24,34 @@ CREATE TABLE IF NOT EXISTS metric_samples (
 );
 
 CREATE INDEX IF NOT EXISTS idx_metric_samples_ts ON metric_samples (ts);
+
+-- Fatia 4: regras de alerta configuráveis e alertas disparados.
+CREATE TABLE IF NOT EXISTS alert_rules (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    metric     TEXT    NOT NULL,   -- cpu_pct | mem_pct | disk_pct
+    operator   TEXT    NOT NULL,   -- > | >= | < | <=
+    threshold  REAL    NOT NULL,
+    duration_s INTEGER NOT NULL DEFAULT 0,
+    enabled    INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS alerts (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    rule_id      INTEGER NOT NULL REFERENCES alert_rules (id),
+    ts           TEXT    NOT NULL,
+    value        REAL    NOT NULL,
+    message      TEXT    NOT NULL,
+    acknowledged INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_alerts_ts ON alerts (ts);
+
+-- Seed das regras default — só quando a tabela está vazia (idempotente).
+INSERT INTO alert_rules (metric, operator, threshold, duration_s, enabled)
+SELECT metric, operator, threshold, duration_s, 1
+FROM (
+    SELECT 'cpu_pct' AS metric, '>' AS operator, 90.0 AS threshold, 60 AS duration_s
+    UNION ALL SELECT 'mem_pct', '>', 90.0, 60
+    UNION ALL SELECT 'disk_pct', '>', 90.0, 0
+)
+WHERE NOT EXISTS (SELECT 1 FROM alert_rules);

@@ -10,21 +10,36 @@ from __future__ import annotations
 
 import asyncio
 import logging
+from datetime import datetime, timezone
 
+from analyzers.alerts import AlertEngine
 from collectors.system import collect_system_metrics
 from config import settings
-from storage.repositories import delete_samples_older_than, insert_metric_sample
+from storage.repositories import (
+    delete_samples_older_than,
+    insert_alert,
+    insert_metric_sample,
+    list_enabled_rules,
+)
 
 logger = logging.getLogger("wic.sampler")
 
 # Dias de retenção das amostras raw (ver PLANEJAMENTO §5).
 _RETENTION_DAYS = 7
 
+# Estado do motor de alertas entre amostras (histerese por duração).
+_engine = AlertEngine()
+
 
 def sample_once() -> None:
-    """Uma iteração: coleta, persiste e expurga amostras além da retenção."""
+    """Uma iteração: coleta, persiste, avalia alertas e aplica a retenção."""
     metrics, _meta = collect_system_metrics()
     insert_metric_sample(metrics)
+
+    now = datetime.now(timezone.utc)
+    for alert in _engine.evaluate(metrics, list_enabled_rules(), now):
+        insert_alert(alert.rule_id, alert.ts, alert.value, alert.message)
+
     delete_samples_older_than(days=_RETENTION_DAYS)
 
 

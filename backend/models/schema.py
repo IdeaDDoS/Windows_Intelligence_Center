@@ -96,3 +96,25 @@ class ProcessDetail:
 
     process: ProcessInfo
     signature: SignatureInfo
+
+
+@dataclass
+class AlertRule:
+    """Regra de alerta por limiar sobre uma métrica."""
+
+    id: int
+    metric: str  # cpu_pct | mem_pct | disk_pct
+    operator: str  # > | >= | < | <=
+    threshold: float
+    duration_s: int = 0
+    enabled: bool = True
+
+
+@dataclass
+class Alert:
+    """Um alerta disparado pela avaliação de uma regra."""
+
+    rule_id: int
+    ts: datetime
+    value: float
+    message: str
