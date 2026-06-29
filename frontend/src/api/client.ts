@@ -42,6 +42,45 @@ export interface MetricsLiveResponse {
   meta: MetaPayload
 }
 
+// ── Processos e serviços (Fatia 2) ───────────────────────────────────────────
+
+export interface ProcessItem {
+  pid: number
+  name: string
+  cpu_pct: number
+  rss_mb: number
+  username: string
+  exe: string | null
+}
+
+export interface ProcessListResponse {
+  processes: ProcessItem[]
+  meta: MetaPayload
+}
+
+export interface SignaturePayload {
+  is_signed: boolean
+  status: string
+  signer: string | null
+}
+
+export interface ProcessDetailResponse {
+  process: ProcessItem
+  signature: SignaturePayload
+}
+
+export interface ServiceItem {
+  name: string
+  display_name: string
+  status: string
+  start_type: string
+}
+
+export interface ServiceListResponse {
+  services: ServiceItem[]
+  meta: MetaPayload
+}
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(path, { headers: { Accept: 'application/json' } })
   if (!res.ok) {
@@ -53,4 +92,7 @@ async function getJson<T>(path: string): Promise<T> {
 export const api = {
   health: () => getJson<HealthResponse>('/api/health'),
   metricsLive: () => getJson<MetricsLiveResponse>('/api/metrics/live'),
+  processes: (topN = 15) => getJson<ProcessListResponse>(`/api/processes?top_n=${topN}`),
+  processDetail: (pid: number) => getJson<ProcessDetailResponse>(`/api/processes/${pid}`),
+  services: () => getJson<ServiceListResponse>('/api/services'),
 }

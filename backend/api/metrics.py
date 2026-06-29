@@ -7,6 +7,7 @@ from datetime import datetime
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from api.common import MetaPayload, meta_payload
 from collectors.system import collect_host_info, collect_system_metrics
 
 router = APIRouter()
@@ -31,14 +32,6 @@ class HostPayload(BaseModel):
     boot_time: datetime
 
 
-class MetaPayload(BaseModel):
-    source: str
-    partial: bool
-    reason: str | None
-    collected_at: datetime
-    duration_ms: int
-
-
 class MetricsLiveResponse(BaseModel):
     metrics: MetricsPayload
     host: HostPayload
@@ -53,5 +46,5 @@ async def metrics_live() -> MetricsLiveResponse:
     return MetricsLiveResponse(
         metrics=MetricsPayload(**vars(metrics)),
         host=HostPayload(**vars(host)),
-        meta=MetaPayload(**vars(meta)),
+        meta=meta_payload(meta),
     )
