@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     app_port: int = 8000
     # Intervalo do sampler de métricas (usado a partir da Fatia 3).
     sample_interval_seconds: int = 5
+    # Liga o sampler em background no lifespan (desligado nos testes).
+    sampler_enabled: bool = True
     # Arquivo SQLite local (runtime, fora do versionamento).
     db_path: Path = PROJECT_ROOT / "database" / "wic.db"
     # Chave da API Anthropic — opcional; o painel funciona sem ela.

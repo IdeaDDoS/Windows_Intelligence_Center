@@ -7,6 +7,7 @@ via proxy. Em produção, o build do React é servido como estático a partir de
 
 from __future__ import annotations
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -18,6 +19,7 @@ from fastapi.staticfiles import StaticFiles
 
 from api.router import api_router
 from config import settings
+from services.sampler import run_sampler
 from storage.db import init_db
 
 logging.basicConfig(
@@ -29,10 +31,20 @@ logger = logging.getLogger("wic")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Inicializa o banco SQLite na subida do servidor."""
+    """Inicializa o banco e sobe o sampler em background; encerra no shutdown."""
     init_db()
     logger.info("Banco inicializado em %s", settings.db_path)
+
+    stop = asyncio.Event()
+    sampler_task: asyncio.Task[None] | None = None
+    if settings.sampler_enabled:
+        sampler_task = asyncio.create_task(run_sampler(stop))
+
     yield
+
+    if sampler_task is not None:
+        stop.set()
+        await sampler_task
 
 
 app = FastAPI(

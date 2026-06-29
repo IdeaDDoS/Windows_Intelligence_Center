@@ -81,6 +81,24 @@ export interface ServiceListResponse {
   meta: MetaPayload
 }
 
+// ── Histórico de métricas (Fatia 3) ──────────────────────────────────────────
+
+export type HistoryRange = '1h' | '6h' | '24h'
+
+export interface HistoryPoint {
+  ts: string
+  cpu_pct: number
+  mem_pct: number
+  disk_pct: number
+  net_sent: number
+  net_recv: number
+}
+
+export interface MetricsHistoryResponse {
+  range: string
+  points: HistoryPoint[]
+}
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(path, { headers: { Accept: 'application/json' } })
   if (!res.ok) {
@@ -95,4 +113,6 @@ export const api = {
   processes: (topN = 15) => getJson<ProcessListResponse>(`/api/processes?top_n=${topN}`),
   processDetail: (pid: number) => getJson<ProcessDetailResponse>(`/api/processes/${pid}`),
   services: () => getJson<ServiceListResponse>('/api/services'),
+  metricsHistory: (range: HistoryRange) =>
+    getJson<MetricsHistoryResponse>(`/api/metrics/history?range=${range}`),
 }

@@ -12,7 +12,7 @@ import sqlite3
 from config import settings
 
 # Versão atual do schema (incrementa a cada mudança de DDL).
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 # DDL versionado, ao lado do arquivo .db.
 _SCHEMA_FILE = settings.db_path.parent / "schema.sql"
 
@@ -32,9 +32,10 @@ def init_db() -> None:
     ddl = _SCHEMA_FILE.read_text(encoding="utf-8")
     with get_connection() as conn:
         conn.executescript(ddl)
-        # Registra a versão atual apenas na primeira aplicação.
+        # Registra a versão sempre que o schema avança (mantém o histórico de
+        # versões aplicadas; o DDL em si é idempotente via IF NOT EXISTS).
         row = conn.execute("SELECT MAX(version) AS v FROM schema_meta").fetchone()
-        if row["v"] is None:
+        if row["v"] is None or row["v"] < SCHEMA_VERSION:
             conn.execute(
                 "INSERT INTO schema_meta (version) VALUES (?)", (SCHEMA_VERSION,)
             )
