@@ -99,6 +99,18 @@ class ProcessDetail:
 
 
 @dataclass
+class EventInfo:
+    """Um evento do log de eventos do Windows (Event Viewer)."""
+
+    ts: datetime
+    log: str
+    provider: str
+    event_id: int
+    level: str
+    message: str
+
+
+@dataclass
 class AlertRule:
     """Regra de alerta por limiar sobre uma métrica."""
 

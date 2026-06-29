@@ -140,6 +140,33 @@ export interface AlertRuleInput {
 
 export type AlertRulePatch = Partial<AlertRuleInput>
 
+// ── Eventos / Event Viewer (Fatia 5) ─────────────────────────────────────────
+
+export type EventLog = 'System' | 'Application' | 'Security'
+export type EventLevel = 'all' | 'critical' | 'error' | 'warning' | 'information'
+export type EventSince = '1h' | '6h' | '24h' | '7d'
+
+export interface EventItem {
+  ts: string
+  log: string
+  provider: string
+  event_id: number
+  level: string
+  message: string
+}
+
+export interface EventListResponse {
+  events: EventItem[]
+  meta: MetaPayload
+}
+
+export interface EventQuery {
+  log: EventLog
+  level: EventLevel
+  since: EventSince
+  limit?: number
+}
+
 async function getJson<T>(path: string): Promise<T> {
   const res = await fetch(path, { headers: { Accept: 'application/json' } })
   if (!res.ok) {
@@ -179,4 +206,13 @@ export const api = {
     sendJson<AlertRule>('/api/alert_rules', 'POST', input),
   updateRule: (id: number, patch: AlertRulePatch) =>
     sendJson<AlertRule>(`/api/alert_rules/${id}`, 'PUT', patch),
+  events: (q: EventQuery) => {
+    const params = new URLSearchParams({
+      log: q.log,
+      level: q.level,
+      since: q.since,
+      limit: String(q.limit ?? 200),
+    })
+    return getJson<EventListResponse>(`/api/events?${params.toString()}`)
+  },
 }

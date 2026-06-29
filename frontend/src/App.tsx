@@ -6,6 +6,7 @@ import { DashboardPage } from './pages/DashboardPage'
 import { ProcessesPage } from './pages/ProcessesPage'
 import { HistoryPage } from './pages/HistoryPage'
 import { AlertsPage } from './pages/AlertsPage'
+import { EventsPage } from './pages/EventsPage'
 
 export function App() {
   const { t } = useApp()
@@ -19,6 +20,7 @@ export function App() {
           </NavLink>
           <NavLink to="/processes">{t.navProcesses}</NavLink>
           <NavLink to="/history">{t.navHistory}</NavLink>
+          <NavLink to="/events">{t.navEvents}</NavLink>
           <NavLink to="/alerts">
             {t.navAlerts}
             <AlertBadge />
@@ -30,6 +32,7 @@ export function App() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/processes" element={<ProcessesPage />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/events" element={<EventsPage />} />
           <Route path="/alerts" element={<AlertsPage />} />
         </Routes>
       </main>

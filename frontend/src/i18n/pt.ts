@@ -11,6 +11,7 @@ export const pt = {
   navProcesses: 'Processos',
   navHistory: 'Histórico',
   navAlerts: 'Alertas',
+  navEvents: 'Eventos',
   // Métricas (Fatia 1)
   cpu: 'CPU',
   memory: 'Memória',
@@ -54,6 +55,23 @@ export const pt = {
   threshold: 'Limiar',
   durationS: 'Duração (s)',
   enabled: 'Ativa',
+  // Eventos (Fatia 5)
+  events: 'Eventos do Windows',
+  eventLog: 'Log',
+  eventLevel: 'Nível',
+  eventSince: 'Período',
+  levelAll: 'Todos',
+  levelCritical: 'Crítico',
+  levelError: 'Erro',
+  levelWarning: 'Aviso',
+  levelInformation: 'Informação',
+  colTime: 'Quando',
+  colLevel: 'Nível',
+  colSource: 'Origem',
+  colEventId: 'ID',
+  colMessage: 'Mensagem',
+  noEvents: 'Nenhum evento no filtro atual.',
+  eventsPartial: 'Coleta parcial — o log Security exige executar como administrador.',
 } as const
 
 export type Strings = typeof pt

@@ -375,3 +375,23 @@ button:hover {
   border-radius: 8px;
   padding: 6px 10px;
 }
+
+/* Eventos (Fatia 5) */
+.filters {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.filters .field span {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.event-message {
+  max-width: 520px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
